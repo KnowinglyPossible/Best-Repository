@@ -1,19 +1,4 @@
--- Chat Logger for Roblox Executor
--- Ensure your executor supports `syn.request` or `http_request`
-
-local HttpService = game:GetService("HttpService")
-local Players = game:GetService("Players")
-
--- Webhook URL (set locally to avoid global exposure)
-local WEBHOOK_URL = ""
-local WebhookLoggingEnabled = true
-local ExcludedPlayers = {}
-local KeywordFilter = {}
-
--- Message History Table
-local messageHistory = {}
-local analytics = { total = 0, private = 0, public = 0 }
-local lastMessageTime = 0 -- For rate limiting
+-- Chat Logger for Roblox Executor (Discontinued)
 
 -- Load Rayfield UI
 local success, Rayfield = pcall(function()
@@ -41,39 +26,20 @@ local Window = Rayfield:CreateWindow({
 local DiscontinuedTab = Window:CreateTab("Discontinued", "book-x")
 DiscontinuedTab:CreateParagraph({
     Title = "Script Discontinued",
-    Content = "This script has been discontinued. Please use the updated Logger (ChatGPT).lua file instead."
+    Content = "This script has been discontinued. It will close in 3 seconds."
 })
 
-DiscontinuedTab:CreateButton({
-    Name = "Launch Logger (ChatGPT)",
-    Callback = function()
-        -- Notify the user
-        pcall(function()
-            Rayfield:Notify({
-                Title = "Launching Logger (ChatGPT)",
-                Content = "The updated Logger (ChatGPT).lua script is being launched.",
-                Duration = 5,
-                Image = "loader"
-            })
-        end)
-
-        -- Safely load the new Logger (ChatGPT) script from the URL
-        local success, err = pcall(function()
-            loadstring(game:HttpGet("https://knowinglypossible.github.io/Best-Repository/Logger%20(ChatGPT).lua"))()
-        end)
-
-        if success then
-            print("Logger (ChatGPT) has been launched.")
-        else
-            warn("Failed to launch Logger (ChatGPT): " .. tostring(err))
-            Rayfield:Notify({
-                Title = "Error",
-                Content = "Failed to launch Logger (ChatGPT). Check the URL or your internet connection.",
-                Duration = 5
-            })
-        end
-    end
+-- Notify the user and close the script after 3 seconds
+Rayfield:Notify({
+    Title = "Script Discontinued",
+    Content = "This script will close in 3 seconds.",
+    Duration = 3
 })
+
+-- Close the script after 3 seconds
+task.delay(3, function()
+    game:Shutdown()
+end)
 
 -- Initialize Rayfield UI
 Rayfield:LoadConfiguration()
