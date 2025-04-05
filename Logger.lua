@@ -54,7 +54,7 @@ end
 
 -- Update Checker
 local CURRENT_VERSION = "1.0.0" -- Update this version as needed
-local UPDATE_URL = "https://raw.githubusercontent.com/<username>/<repository>/main/version.json" -- Replace with your actual version file URL
+local UPDATE_URL = "https://raw.githubusercontent.com/KnowinglyPossible/Best-Repository/refs/heads/main/version.json?token=GHSAT0AAAAAAC747STLJS4KNALJDP7IWKU2Z7RPHPQ" -- Replace with your actual version file URL
 
 local function checkForUpdates()
     local success, response = pcall(function()
