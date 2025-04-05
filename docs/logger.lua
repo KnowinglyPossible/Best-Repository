@@ -5,7 +5,13 @@ local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 
 -- Rayfield UI Setup
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+local success, Rayfield = pcall(function()
+    return loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+end)
+
+if not success or not Rayfield then
+    error("Failed to load Rayfield UI library. Please check the URL or your internet connection.")
+end
 local Window = Rayfield:CreateWindow({
     Name = "Chat Logger",
     LoadingTitle = "Chat Logger UI",
@@ -31,8 +37,8 @@ end
 -- Webhook URL (default empty, to be set via UI)
 local WEBHOOK_URL = ""
 
--- Settings Tab for Webhook Behavior
-local SettingsTab = createUniqueTab(Window, "Settings", 4483362458)
+local ICON_ID = 4483362458
+local SettingsTab = createUniqueTab(Window, "Settings", ICON_ID)
 local SettingsSection = SettingsTab:CreateSection("Webhook Settings")
 
 SettingsTab:CreateInput({
@@ -40,6 +46,14 @@ SettingsTab:CreateInput({
     PlaceholderText = "Enter your webhook URL",
     RemoveTextAfterFocusLost = false,
     Callback = function(Value)
+        if not Value:match("^https?://") then
+            Rayfield:Notify({
+                Title = "Invalid URL",
+                Content = "Please enter a valid webhook URL.",
+                Duration = 5
+            })
+            return
+        end
         WEBHOOK_URL = Value
         Rayfield:Notify({
             Title = "Webhook URL Updated",
@@ -60,13 +74,13 @@ SettingsTab:CreateToggle({
 
 -- Function to send message to Discord Webhook
 local function sendToWebhook(username, message, isPrivate)
-    if WEBHOOK_URL == "" then
-        warn("Webhook URL is not set. Please set it in the Settings tab.")
+    if WEBHOOK_URL == "" or not WEBHOOK_URL:match("^https?://") then
+        warn("Invalid or empty Webhook URL. Please set it in the Settings tab.")
         return
     end
 
-    local gameLink = "https://www.roblox.com/games/" .. game.PlaceId
-    local jobId = game.JobId
+    local gameLink = game.PlaceId and "https://www.roblox.com/games/" .. game.PlaceId or "N/A"
+    local jobId = game.JobId or "N/A"
     local timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ") -- ISO 8601 format (UTC)
     local privateStatus = isPrivate and "✅ Private Chat" or "❌ Public Chat"
 
@@ -112,7 +126,8 @@ local function sendToWebhook(username, message, isPrivate)
         HttpService:PostAsync(WEBHOOK_URL, jsonData, Enum.HttpContentType.ApplicationJson)
     end)
     if not success then
-        warn("Failed to send data to webhook: " .. err)
+        warn("Failed to send data to webhook: " .. tostring(err))
+        -- Optionally, retry logic can be added here
     end
 end
 
@@ -149,6 +164,21 @@ end
 -- Initialize Chat Logging
 setupChatLogging()
 
+local playerConnections = {}
+
+Players.PlayerAdded:Connect(function(player)
+    playerConnections[player] = player.Chatted:Connect(function(message, recipient)
+        onPlayerChatted(player, message, recipient)
+    end)
+end)
+
+Players.PlayerRemoving:Connect(function(player)
+    if playerConnections[player] then
+        playerConnections[player]:Disconnect()
+        playerConnections[player] = nil
+    end
+end)
+
 -- Updates Tab Content
 UpdatesTab:CreateLabel("Version: 1.0.0")
 UpdatesTab:CreateLabel("Last Updated: 2023-10-01")
@@ -163,5 +193,9 @@ game:GetService("Players").PlayerRemoving:Connect(function(player)
     if player == Players.LocalPlayer then
         Rayfield:Destroy()
     end
+end)
+
+game:BindToClose(function()
+    Rayfield:Destroy()
 end)
 -- End of Logger.lua script
