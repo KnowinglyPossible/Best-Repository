@@ -252,38 +252,3 @@ Players.PlayerAdded:Connect(function(player)
         coroutine.wrap(logPlayerCoordinates)(player)
     end)
 end)
-
--- Updates Tab
-local UpdatesTab = Window:CreateTab("Updates", 4483362458) -- Tab with an icon
-local UpdatesSection = UpdatesTab:CreateSection("Current Updates")
-
--- Add current updates
-UpdatesTab:CreateParagraph({
-    Title = "Version 1.0.0 Updates",
-    Content = [[
-    - Added chat logging to Discord Webhook.
-    - Logs the following details for each message:
-        - Username
-        - Game Link
-        - Job ID
-        - Private Chat Status (✅ or ❌)
-        - Timestamp
-    - Integrated an update checker to fetch the latest version from GitHub.
-    - Automatically downloads and executes the updated script if a new version is available.
-    - Added a Chat History tab to display the last 50 chat messages.
-    - Added a button to manually check for updates.
-    ]]
-})
-
--- Section for future features
-local FutureFeaturesSection = UpdatesTab:CreateSection("Planned Features")
-
-UpdatesTab:CreateParagraph({
-    Title = "Upcoming Features",
-    Content = [[
-    - Add player tracking to log player coordinates and send them to the Discord Webhook.
-    - Implement a feature to display the game map in the UI.
-    - Add support for filtering chat messages based on keywords.
-    - Create a settings tab to customize webhook behavior.
-    ]]
-})
