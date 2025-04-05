@@ -1,6 +1,21 @@
 # Logger.lua
 `logger.lua` is a lightweight and efficient logging utility designed for Lua-based projects. It provides developers with a simple way to log messages of varying severity levels (e.g., info, warning, error) to help with debugging and monitoring application behavior. This script is particularly useful for game development or other Lua-based applications where structured logging is essential.
 
+## Usage Examples
+
+Here are some examples of how the `logger.lua` script can be used in a game environment:
+
+### Example 1: Info Log
+![Info Log Example](https://via.placeholder.com/600x200?text=Info+Log+Example)
+
+### Example 2: Warning Log
+![Warning Log Example](https://via.placeholder.com/600x200?text=Warning+Log+Example)
+
+### Example 3: Error Log
+![Error Log Example](https://via.placeholder.com/600x200?text=Error+Log+Example)
+
+These images demonstrate how log messages appear in a typical game console or debug window, helping developers quickly identify issues or monitor application behavior.
+
 ## Features
 - **Customizable Log Levels**: Supports multiple log levels such as `INFO`, `WARN`, `ERROR`, and more.
 - **Easy Integration**: Can be seamlessly integrated into any Lua project.
