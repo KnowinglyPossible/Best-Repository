@@ -4,15 +4,16 @@
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 
--- Webhook URL (default empty, to be set via UI)
-getgenv().WEBHOOK_URL = ""
-getgenv().WebhookLoggingEnabled = true
-getgenv().ExcludedPlayers = {}
-getgenv().KeywordFilter = {}
+-- Webhook URL (set locally to avoid global exposure)
+local WEBHOOK_URL = ""
+local WebhookLoggingEnabled = true
+local ExcludedPlayers = {}
+local KeywordFilter = {}
 
 -- Message History Table
 local messageHistory = {}
 local analytics = { total = 0, private = 0, public = 0 }
+local lastMessageTime = 0 -- For rate limiting
 
 -- Load Rayfield UI
 local success, Rayfield = pcall(function()
@@ -36,66 +37,25 @@ local Window = Rayfield:CreateWindow({
     KeySystem = false
 })
 
+-- Function to validate webhook URL
+local function isValidWebhookURL(url)
+    return url:match("^https?://")
+end
+
 -- Function to send message to Discord Webhook
 local function sendToWebhook(username, message, isPrivate)
-    if getgenv().WEBHOOK_URL == "" or not getgenv().WEBHOOK_URL:match("^https?://") then
+    if WEBHOOK_URL == "" or not isValidWebhookURL(WEBHOOK_URL) then
         warn("Invalid or empty Webhook URL. Please set it in the Settings tab.")
         return
     end
 
-    if not getgenv().WebhookLoggingEnabled then
+    -- Rate limiting: Ensure at least 1 second between messages
+    local currentTime = os.time()
+    if currentTime - lastMessageTime < 1 then
+        warn("Rate limit exceeded. Please wait before sending another message.")
         return
     end
-
-    local player = Players.LocalPlayer
-    if not player then
-        warn("LocalPlayer not found. Cannot send message to webhook.")
-        return
-    end
-
-    if table.find(getgenv().ExcludedPlayers, username) then
-        warn("Player " .. username .. " is excluded from logging.")
-        return
-    end
-
-    -- Check if the player is in a game
-    if not game:IsLoaded() or not game.Players then
-        warn("Game is not loaded or Players service is unavailable.")
-        return
-    end
-
-    -- Check for keyword filter
-    local shouldLog = #getgenv().KeywordFilter == 0
-    for _, keyword in ipairs(getgenv().KeywordFilter) do
-        if message:lower():find(keyword) then
-            shouldLog = true
-            break
-        end
-    end
-
-    if not shouldLog then
-        warn("Message does not match any keyword filter. Not sending to webhook.")
-        return
-    end
-
-    -- Check if the player is in a game
-    local playerInGame = Players:FindFirstChild(username)
-    if not playerInGame then
-        warn("Player " .. username .. " is not in the game.")
-        return
-    end
-
-    -- Check if the game is private or public
-    local isPrivate = false
-    if game.PrivateServerId and game.PrivateServerId ~= "" then
-        isPrivate = true
-    end
-
-    -- Check if the webhook URL is set and valid
-    if not getgenv().WEBHOOK_URL or getgenv().WEBHOOK_URL == "" then
-        warn("Webhook URL is not set. Cannot send message.")
-        return
-    end
+    lastMessageTime = currentTime
 
     local gameLink = game.PlaceId and "https://www.roblox.com/games/" .. game.PlaceId or "N/A"
     local jobId = game.JobId or "N/A"
@@ -143,7 +103,7 @@ local function sendToWebhook(username, message, isPrivate)
     local response = syn.request or http_request or request -- Use executor's HTTP request API
     local success, err = pcall(function()
         response({
-            Url = getgenv().WEBHOOK_URL,
+            Url = WEBHOOK_URL,
             Method = "POST",
             Headers = { ["Content-Type"] = "application/json" },
             Body = jsonData
@@ -159,11 +119,11 @@ end
 
 -- Function to log chat messages
 local function onPlayerChatted(player, message, recipient)
-    if not getgenv().WebhookLoggingEnabled then
+    if not WebhookLoggingEnabled then
         return
     end
 
-    if table.find(getgenv().ExcludedPlayers, player.Name) then
+    if table.find(ExcludedPlayers, player.Name) then
         return
     end
 
@@ -171,8 +131,8 @@ local function onPlayerChatted(player, message, recipient)
     local chatType = isPrivate and "[Private]" or "[Public]"
 
     -- Check for keyword filter
-    local shouldLog = #getgenv().KeywordFilter == 0
-    for _, keyword in ipairs(getgenv().KeywordFilter) do
+    local shouldLog = #KeywordFilter == 0
+    for _, keyword in ipairs(KeywordFilter) do
         if message:lower():find(keyword) then
             shouldLog = true
             break
@@ -229,12 +189,20 @@ MainTab:CreateInput({
     PlaceholderText = "Enter your webhook URL",
     RemoveTextAfterFocusLost = false,
     Callback = function(Value)
-        getgenv().WEBHOOK_URL = Value
-        Rayfield:Notify({
-            Title = "Webhook URL Updated",
-            Content = "The webhook URL has been updated successfully.",
-            Duration = 5
-        })
+        if isValidWebhookURL(Value) then
+            WEBHOOK_URL = Value
+            Rayfield:Notify({
+                Title = "Webhook URL Updated",
+                Content = "The webhook URL has been updated successfully.",
+                Duration = 5
+            })
+        else
+            Rayfield:Notify({
+                Title = "Invalid Webhook URL",
+                Content = "Please enter a valid webhook URL.",
+                Duration = 5
+            })
+        end
     end
 })
 
@@ -243,7 +211,7 @@ MainTab:CreateToggle({
     CurrentValue = true,
     Flag = "EnableWebhookLogging",
     Callback = function(Value)
-        getgenv().WebhookLoggingEnabled = Value
+        WebhookLoggingEnabled = Value
     end
 })
 
@@ -252,9 +220,9 @@ MainTab:CreateInput({
     PlaceholderText = "Enter keywords separated by commas",
     RemoveTextAfterFocusLost = false,
     Callback = function(Value)
-        getgenv().KeywordFilter = {}
+        KeywordFilter = {}
         for keyword in Value:gmatch("[^,]+") do
-            table.insert(getgenv().KeywordFilter, keyword:lower():gsub("^%s*(.-)%s*$", "%1")) -- Trim and lowercase
+            table.insert(KeywordFilter, keyword:lower():gsub("^%s*(.-)%s*$", "%1")) -- Trim and lowercase
         end
         Rayfield:Notify({
             Title = "Keyword Filter Updated",
@@ -269,7 +237,7 @@ MainTab:CreateInput({
     PlaceholderText = "Enter player name",
     RemoveTextAfterFocusLost = false,
     Callback = function(Value)
-        table.insert(getgenv().ExcludedPlayers, Value)
+        table.insert(ExcludedPlayers, Value)
         Rayfield:Notify({
             Title = "Player Excluded",
             Content = Value .. " will no longer be logged.",
