@@ -42,6 +42,41 @@ local function sendToWebhook(username, message, isPrivate)
         warn("Invalid or empty Webhook URL. Please set it in the Settings tab.")
         return
     end
+
+    if not getgenv().WebhookLoggingEnabled then
+        return
+    end
+
+    local player = Players.LocalPlayer
+    if not player then
+        warn("LocalPlayer not found. Cannot send message to webhook.")
+        return
+    end
+
+    if table.find(getgenv().ExcludedPlayers, username) then
+        warn("Player " .. username .. " is excluded from logging.")
+        return
+    end
+
+    -- Check if the player is in a game
+    if not game:IsLoaded() or not game.Players then
+        warn("Game is not loaded or Players service is unavailable.")
+        return
+    end
+
+    -- Check for keyword filter
+    local shouldLog = #getgenv().KeywordFilter == 0
+    for _, keyword in ipairs(getgenv().KeywordFilter) do
+        if message:lower():find(keyword) then
+            shouldLog = true
+            break
+        end
+    end
+
+    if not shouldLog then
+        warn("Message does not match any keyword filter. Not sending to webhook.")
+        return
+    end
         return
     end
 
