@@ -26,19 +26,20 @@ local Window = Rayfield:CreateWindow({
 local DiscontinuedTab = Window:CreateTab("Discontinued", "book-x")
 DiscontinuedTab:CreateParagraph({
     Title = "Script Discontinued",
-    Content = "This script has been discontinued. It will close in 3 seconds."
+    Content = "This script has been discontinued. The Rayfield UI will be removed in 3 seconds."
 })
 
--- Notify the user and close the script after 3 seconds
+-- Notify the user and delete the Rayfield script after 3 seconds
 Rayfield:Notify({
     Title = "Script Discontinued",
-    Content = "This script will close in 3 seconds.",
+    Content = "The Rayfield UI will be removed in 3 seconds.",
     Duration = 3
 })
 
--- Close the script after 3 seconds
+-- Delete the Rayfield UI after 3 seconds
 task.delay(3, function()
-    game:Shutdown()
+    Rayfield:Destroy() -- Removes the Rayfield UI
+    print("Rayfield UI has been removed.")
 end)
 
 -- Initialize Rayfield UI
