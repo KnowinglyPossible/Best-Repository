@@ -253,6 +253,85 @@ Players.PlayerAdded:Connect(function(player)
     end)
 end)
 
+-- Display Game Map in the UI
+local function showGameMap()
+    local map = game.Workspace:FindFirstChild("Map")
+    if map then
+        Rayfield:Notify({
+            Title = "Game Map",
+            Content = "Map found: " .. map.Name,
+            Duration = 5
+        })
+    else
+        Rayfield:Notify({
+            Title = "Game Map",
+            Content = "No map found in the game!",
+            Duration = 5
+        })
+    end
+end
+
+local ExtraFeaturesTab = Window:CreateTab("Extra Features", 4483362458)
+ExtraFeaturesTab:CreateButton({
+    Name = "Show Game Map",
+    Callback = function()
+        showGameMap()
+    end
+})
+
+-- Filter Chat Messages Based on Keywords
+local FilteredKeywords = {"badword1", "badword2", "badword3"} -- Add your keywords here
+
+local function filterChatMessage(message)
+    for _, keyword in ipairs(FilteredKeywords) do
+        if string.find(string.lower(message), string.lower(keyword)) then
+            return true -- Message contains a filtered keyword
+        end
+    end
+    return false
+end
+
+Players.PlayerAdded:Connect(function(player)
+    player.Chatted:Connect(function(message)
+        if filterChatMessage(message) then
+            Rayfield:Notify({
+                Title = "Filtered Message",
+                Content = "A filtered message was detected: " .. message,
+                Duration = 5
+            })
+        else
+            sendToWebhook(player.Name, message, false) -- Log the message if it doesn't contain filtered keywords
+        end
+    end)
+end)
+
+-- Settings Tab for Webhook Behavior
+local SettingsTab = Window:CreateTab("Settings", 4483362458)
+local SettingsSection = SettingsTab:CreateSection("Webhook Settings")
+
+SettingsTab:CreateToggle({
+    Name = "Enable Webhook Logging",
+    CurrentValue = true,
+    Flag = "EnableWebhookLogging",
+    Callback = function(Value)
+        _G.WebhookLoggingEnabled = Value
+    end
+})
+
+SettingsTab:CreateInput({
+    Name = "Set Webhook URL",
+    PlaceholderText = "Enter your webhook URL",
+    RemoveTextAfterFocusLost = false,
+    Callback = function(Value)
+        WEBHOOK_URL = Value
+        Rayfield:Notify({
+            Title = "Webhook URL Updated",
+            Content = "The webhook URL has been updated successfully.",
+            Duration = 5
+        })
+    end
+})
+
 -- Updates Tab
 local UpdatesTab = Window:CreateTab("Updates", 4483362458) -- Tab with an icon
 local UpdatesSection = UpdatesTab:CreateSection("Current Updates")
