@@ -17,7 +17,7 @@ end
 local Window = Rayfield:CreateWindow({
     Name = "Chat Logger",
     LoadingTitle = "Chat Logger UI",
-    LoadingSubtitle = "by GitHub Copilot",
+    LoadingSubtitle = "by Carlos277415",
     ConfigurationSaving = {
         Enabled = true,
         FolderName = "ChatLogger",
