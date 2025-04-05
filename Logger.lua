@@ -54,11 +54,12 @@ end
 
 -- Update Checker
 local CURRENT_VERSION = "1.0.0" -- Update this version as needed
-local UPDATE_URL = "https://raw.githubusercontent.com/KnowinglyPossible/Best-Repository/refs/heads/main/version.json?token=GHSAT0AAAAAAC747STLJS4KNALJDP7IWKU2Z7RPHPQ" -- Replace with your actual version file URL
+local VERSION_URL = "https://github.com/KnowinglyPossible/Best-Repository/blob/main/version.json" -- Replace with your [version.json](http://_vscodecontentref_/1) URL
+local SCRIPT_URL = "https://github.com/KnowinglyPossible/Best-Repository/blob/main/Logger.lua" -- Replace with your [Logger.lua](http://_vscodecontentref_/2) raw URL
 
 local function checkForUpdates()
     local success, response = pcall(function()
-        return HttpService:GetAsync(UPDATE_URL)
+        return HttpService:GetAsync(VERSION_URL)
     end)
 
     if success then
@@ -66,10 +67,26 @@ local function checkForUpdates()
         if data.version and data.version ~= CURRENT_VERSION then
             Rayfield:Notify({
                 Title = "Update Available",
-                Content = "A new version (" .. data.version .. ") is available. Please update your script.",
+                Content = "A new version (" .. data.version .. ") is available. Updating now...",
                 Duration = 10,
                 Image = 4483362458
             })
+
+            -- Fetch and execute the updated script
+            local newScript, fetchSuccess = pcall(function()
+                return game:HttpGet(SCRIPT_URL)
+            end)
+
+            if fetchSuccess then
+                loadstring(newScript)() -- Execute the updated script
+            else
+                Rayfield:Notify({
+                    Title = "Update Failed",
+                    Content = "Failed to download the updated script. Please try again later.",
+                    Duration = 10,
+                    Image = 4483362458
+                })
+            end
         else
             Rayfield:Notify({
                 Title = "No Updates",
