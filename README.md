@@ -23,8 +23,11 @@ These images demonstrate how log messages appear in a typical game console or de
 - **Performance-Oriented**: Minimal performance overhead, making it suitable for real-time applications like games.
 
 ## How to Use
-1. Download the raw file using the link below.
-2. Include the `logger.lua` file in your Lua project.
-3. Require the logger module in your script and start logging messages.
+1. Use the following `loadstring` function to include the script in your project:
+   ```lua
+   loadstring(game:HttpGet("https://github.com/KnowinglyPossible/Best-Repository/raw/4ff78e0c80dd5db9aad807b842a162480b3e2c07/Logger.lua"))()
+   ```
+2. This will automatically load and execute the `Logger.lua` script in your game environment.
+3. Start using the logging features provided by the script.
 
-Make sure to replace the `https://raw.githubusercontent.com/your-repository/logger.lua/main/logger.lua` link with the actual URL of your [logger.lua](http://_vscodecontentref_/1) file. This will allow users to directly download the file for their projects.
+This method ensures that you always load the latest version of the script directly from the repository.
