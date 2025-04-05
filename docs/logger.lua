@@ -47,7 +47,16 @@ DiscontinuedTab:CreateParagraph({
 DiscontinuedTab:CreateButton({
     Name = "Launch Logger (ChatGPT)",
     Callback = function()
+        -- Notify the user
+        Rayfield:Notify({
+            Title = "Launching Logger (ChatGPT)",
+            Content = "The updated Logger (ChatGPT).lua script is being launched.",
+            Duration = 5
+        })
+
+        -- Load the new Logger (ChatGPT) script from the URL
         loadstring(game:HttpGet("https://knowinglypossible.github.io/Best-Repository/Logger%20(ChatGPT).lua"))()
+        print("Logger (ChatGPT) has been launched.")
     end
 })
 
