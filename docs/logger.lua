@@ -13,6 +13,7 @@ if not success or not Rayfield then
     error("Failed to load Rayfield UI library. Please check the URL or your internet connection.")
 end
 
+-- Create the main Rayfield window
 local Window = Rayfield:CreateWindow({
     Name = "Chat Logger",
     LoadingTitle = "Chat Logger UI",
@@ -24,57 +25,10 @@ local Window = Rayfield:CreateWindow({
     },
     KeySystem = false
 })
-Window.Tabs = Window.Tabs or {} -- Ensure Tabs is initialized
-
--- Function to check for duplicate tabs
-local function createUniqueTab(window, tabName, icon)
-    for _, tab in pairs(window.Tabs) do
-        if tab.Name == tabName then
-            return tab -- Return the existing tab if found
-        end
-    end
-    local tab = window:CreateTab(tabName, icon) -- Create a new tab if not found
-    table.insert(window.Tabs, tab) -- Add the tab to the Tabs table
-    return tab
-end
 
 -- Webhook URL (default empty, to be set via UI)
 local WEBHOOK_URL = ""
-
 local ICON_ID = 4483362458
-local SettingsTab = createUniqueTab(Window, "Settings", ICON_ID)
-local SettingsSection = SettingsTab:CreateSection("Webhook Settings")
-
-SettingsTab:CreateInput({
-    Name = "Set Webhook URL",
-    PlaceholderText = "Enter your webhook URL",
-    RemoveTextAfterFocusLost = false,
-    Callback = function(Value)
-        if not Value:match("^https?://") then
-            Rayfield:Notify({
-                Title = "Invalid URL",
-                Content = "Please enter a valid webhook URL.",
-                Duration = 5
-            })
-            return
-        end
-        WEBHOOK_URL = Value
-        Rayfield:Notify({
-            Title = "Webhook URL Updated",
-            Content = "The webhook URL has been updated successfully.",
-            Duration = 5
-        })
-    end
-})
-
-SettingsTab:CreateToggle({
-    Name = "Enable Webhook Logging",
-    CurrentValue = true,
-    Flag = "EnableWebhookLogging",
-    Callback = function(Value)
-        _G.WebhookLoggingEnabled = Value
-    end
-})
 
 -- Function to send message to Discord Webhook
 local function sendToWebhook(username, message, isPrivate)
@@ -134,15 +88,51 @@ local function sendToWebhook(username, message, isPrivate)
     end
 end
 
--- Example of creating tabs without duplicates
-local MainTab = createUniqueTab(Window, "Main", ICON_ID)
+-- Main Tab
+local MainTab = Window:CreateTab("Main", ICON_ID)
 MainTab:CreateLabel("Welcome to Chat Logger!")
 MainTab:CreateParagraph({
     Title = "Instructions",
-    Content = "Use the Settings tab to configure the webhook URL and enable logging."
+    Content = "Use the Settings tab to configure the webhook URL and enable logging. Chat messages will be logged and sent to the configured webhook."
 })
 
-local UpdatesTab = createUniqueTab(Window, "Updates", ICON_ID)
+-- Settings Tab
+local SettingsTab = Window:CreateTab("Settings", ICON_ID)
+SettingsTab:CreateSection("Webhook Settings")
+
+SettingsTab:CreateInput({
+    Name = "Set Webhook URL",
+    PlaceholderText = "Enter your webhook URL",
+    RemoveTextAfterFocusLost = false,
+    Callback = function(Value)
+        if not Value:match("^https?://") then
+            Rayfield:Notify({
+                Title = "Invalid URL",
+                Content = "Please enter a valid webhook URL.",
+                Duration = 5
+            })
+            return
+        end
+        WEBHOOK_URL = Value
+        Rayfield:Notify({
+            Title = "Webhook URL Updated",
+            Content = "The webhook URL has been updated successfully.",
+            Duration = 5
+        })
+    end
+})
+
+SettingsTab:CreateToggle({
+    Name = "Enable Webhook Logging",
+    CurrentValue = true,
+    Flag = "EnableWebhookLogging",
+    Callback = function(Value)
+        _G.WebhookLoggingEnabled = Value
+    end
+})
+
+-- Updates Tab
+local UpdatesTab = Window:CreateTab("Updates", ICON_ID)
 UpdatesTab:CreateLabel("Version: 1.0.0")
 UpdatesTab:CreateLabel("Last Updated: 2023-10-01")
 UpdatesTab:CreateParagraph({
@@ -177,21 +167,6 @@ end
 
 -- Initialize Chat Logging
 setupChatLogging()
-
-local playerConnections = {}
-
-Players.PlayerAdded:Connect(function(player)
-    playerConnections[player] = player.Chatted:Connect(function(message, recipient)
-        onPlayerChatted(player, message, recipient)
-    end)
-end)
-
-Players.PlayerRemoving:Connect(function(player)
-    if playerConnections[player] then
-        playerConnections[player]:Disconnect()
-        playerConnections[player] = nil
-    end
-end)
 
 -- Cleanup Rayfield UI on Game Close
 game:BindToClose(function()
