@@ -5,7 +5,7 @@ local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 
 -- Replace with your Discord Webhook URL
-local WEBHOOK_URL = "YOUR_WEBHOOK_URL"
+local WEBHOOK_URL = "https://discord.com/api/webhooks/your_webhook_id/your_webhook_token" -- Replace with your actual webhook URL
 
 -- Rayfield UI Setup
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
@@ -70,7 +70,7 @@ Rayfield:Notify({
 
 -- Cleanup when the script is unloaded
 game.Players.PlayerRemoving:Connect(function(player)
-    player.Chatted:Disconnect()
+    -- No need to manually disconnect Chatted connections; they are cleaned up automatically
 end)
 
 -- End of Logger.lua
