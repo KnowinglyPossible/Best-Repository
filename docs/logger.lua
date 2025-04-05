@@ -51,18 +51,9 @@ DiscontinuedTab:CreateButton({
         Rayfield:Notify({
             Title = "Launching Logger (ChatGPT)",
             Content = "The updated Logger (ChatGPT).lua script is being launched.",
-            Duration = 5
-            image = "rbxassetid://4483345998",
-            Actions = {
-                Ignore = { Name = "Ignore", Callback = function() end },
-                Open = { Name = "Open", Callback = function()
-                    -- Open the Logger (ChatGPT) script in a new tab
-                    setclipboard("https://knowinglypossible.github.io/Best-Repository/Logger%20(ChatGPT).lua")
-                    print("Logger (ChatGPT) URL copied to clipboard.")
-                end }
-            }
+            Duration = 5,
+            Image = "loader",
         })
-
         -- Load the new Logger (ChatGPT) script from the URL
         loadstring(game:HttpGet("https://knowinglypossible.github.io/Best-Repository/Logger%20(ChatGPT).lua"))()
         print("Logger (ChatGPT) has been launched.")
