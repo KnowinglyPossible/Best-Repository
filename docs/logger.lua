@@ -42,6 +42,8 @@ local function sendToWebhook(username, message, isPrivate)
         warn("Invalid or empty Webhook URL. Please set it in the Settings tab.")
         return
     end
+        return
+    end
 
     local gameLink = game.PlaceId and "https://www.roblox.com/games/" .. game.PlaceId or "N/A"
     local jobId = game.JobId or "N/A"
