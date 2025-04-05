@@ -38,7 +38,7 @@ local Window = Rayfield:CreateWindow({
 })
 
 -- Discontinued Tab
-local DiscontinuedTab = Window:CreateTab("Discontinued", book-check)
+local DiscontinuedTab = Window:CreateTab("Discontinued", "book-check")
 DiscontinuedTab:CreateParagraph({
     Title = "Script Discontinued",
     Content = "This script has been discontinued. Please use the updated Logger (ChatGPT).lua file instead."
