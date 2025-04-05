@@ -153,6 +153,9 @@ local function onPlayerChatted(player, message, recipient)
         table.remove(messageHistory, 1)
     end
 
+    -- Update chat history in real-time
+    updateChatHistory()
+
     -- Update analytics
     analytics.total = analytics.total + 1
     if isPrivate then
@@ -253,7 +256,22 @@ MainTab:CreateButton({
     end
 })
 
-MainTab:CreateButton({
+-- Chat History Tab
+local ChatHistoryTab = Window:CreateTab("Chat History", 4483362458)
+local chatHistoryParagraph = ChatHistoryTab:CreateParagraph({
+    Title = "Chat History",
+    Content = "No messages yet."
+})
+
+local function updateChatHistory()
+    local content = table.concat(messageHistory, "\n")
+    chatHistoryParagraph:Set({
+        Title = "Chat History",
+        Content = content
+    })
+end
+
+ChatHistoryTab:CreateButton({
     Name = "Export Chat History",
     Callback = function()
         local fileName = "ChatHistory_" .. os.date("%Y-%m-%d_%H-%M-%S") .. ".txt"
