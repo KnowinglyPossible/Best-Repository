@@ -30,6 +30,9 @@ local Window = Rayfield:CreateWindow({
 local WEBHOOK_URL = ""
 local ICON_ID = 4483362458
 
+-- Message History Table
+local messageHistory = {}
+
 -- Function to send message to Discord Webhook
 local function sendToWebhook(username, message, isPrivate)
     if WEBHOOK_URL == "" or not WEBHOOK_URL:match("^https?://") then
@@ -96,6 +99,24 @@ MainTab:CreateParagraph({
     Content = "Use the Settings tab to configure the webhook URL and enable logging. Chat messages will be logged and sent to the configured webhook."
 })
 
+-- Message History Section
+local messageHistoryParagraph = MainTab:CreateParagraph({
+    Title = "Message History",
+    Content = "No messages yet..."
+})
+
+-- Function to update the message history in the UI
+local function updateMessageHistory()
+    local content = ""
+    for _, msg in ipairs(messageHistory) do
+        content = content .. msg .. "\n"
+    end
+    messageHistoryParagraph:Set({
+        Title = "Message History",
+        Content = content
+    })
+end
+
 -- Settings Tab
 local SettingsTab = Window:CreateTab("Settings", ICON_ID)
 SettingsTab:CreateSection("Webhook Settings")
@@ -137,7 +158,7 @@ UpdatesTab:CreateLabel("Version: 1.0.0")
 UpdatesTab:CreateLabel("Last Updated: 2023-10-01")
 UpdatesTab:CreateParagraph({
     Title = "Changelog",
-    Content = "- Added webhook logging\n- Improved UI\n- Fixed minor bugs"
+    Content = "- Added webhook logging\n- Improved UI\n- Fixed minor bugs\n- Added real-time message history"
 })
 
 -- Chat Logging Functionality
@@ -148,6 +169,18 @@ local function onPlayerChatted(player, message, recipient)
 
     local isPrivate = recipient ~= nil
     sendToWebhook(player.Name, message, isPrivate)
+
+    -- Add message to history
+    local chatType = isPrivate and "[Private]" or "[Public]"
+    table.insert(messageHistory, string.format("%s %s: %s", chatType, player.Name, message))
+
+    -- Limit history to the last 50 messages
+    if #messageHistory > 50 then
+        table.remove(messageHistory, 1)
+    end
+
+    -- Update the UI
+    updateMessageHistory()
 end
 
 -- Connect chat events for all players
