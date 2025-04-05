@@ -95,7 +95,21 @@ local function checkForUpdates()
     end)
 
     if success then
-        local data = HttpService:JSONDecode(response)
+        local data
+        local decodeSuccess, decodeError = pcall(function()
+            return HttpService:JSONDecode(response)
+        end)
+        if decodeSuccess then
+            data = decodeError
+        else
+            Rayfield:Notify({
+                Title = "Update Check Failed",
+                Content = "Failed to decode update information. Please try again later.",
+                Duration = 5,
+                Image = 4483362458
+            })
+            return
+        end
         if data.version and data.version ~= CURRENT_VERSION then
             Rayfield:Notify({
                 Title = "Update Available",
