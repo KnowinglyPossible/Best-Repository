@@ -12,6 +12,7 @@ end)
 if not success or not Rayfield then
     error("Failed to load Rayfield UI library. Please check the URL or your internet connection.")
 end
+
 local Window = Rayfield:CreateWindow({
     Name = "Chat Logger",
     LoadingTitle = "Chat Logger UI",
@@ -23,6 +24,7 @@ local Window = Rayfield:CreateWindow({
     },
     KeySystem = false
 })
+Window.Tabs = Window.Tabs or {} -- Ensure Tabs is initialized
 
 -- Function to check for duplicate tabs
 local function createUniqueTab(window, tabName, icon)
@@ -31,7 +33,9 @@ local function createUniqueTab(window, tabName, icon)
             return tab -- Return the existing tab if found
         end
     end
-    return window:CreateTab(tabName, icon) -- Create a new tab if not found
+    local tab = window:CreateTab(tabName, icon) -- Create a new tab if not found
+    table.insert(window.Tabs, tab) -- Add the tab to the Tabs table
+    return tab
 end
 
 -- Webhook URL (default empty, to be set via UI)
@@ -127,15 +131,25 @@ local function sendToWebhook(username, message, isPrivate)
     end)
     if not success then
         warn("Failed to send data to webhook: " .. tostring(err))
-        -- Optionally, retry logic can be added here
     end
 end
 
 -- Example of creating tabs without duplicates
-local MainTab = createUniqueTab(Window, "Main", 4483362458)
-local UpdatesTab = createUniqueTab(Window, "Updates", 4483362458)
+local MainTab = createUniqueTab(Window, "Main", ICON_ID)
+MainTab:CreateLabel("Welcome to Chat Logger!")
+MainTab:CreateParagraph({
+    Title = "Instructions",
+    Content = "Use the Settings tab to configure the webhook URL and enable logging."
+})
 
--- Add other logic here (e.g., chat logging, update checking, etc.)
+local UpdatesTab = createUniqueTab(Window, "Updates", ICON_ID)
+UpdatesTab:CreateLabel("Version: 1.0.0")
+UpdatesTab:CreateLabel("Last Updated: 2023-10-01")
+UpdatesTab:CreateParagraph({
+    Title = "Changelog",
+    Content = "- Added webhook logging\n- Improved UI\n- Fixed minor bugs"
+})
+
 -- Chat Logging Functionality
 local function onPlayerChatted(player, message, recipient)
     if not _G.WebhookLoggingEnabled then
@@ -179,23 +193,7 @@ Players.PlayerRemoving:Connect(function(player)
     end
 end)
 
--- Updates Tab Content
-UpdatesTab:CreateLabel("Version: 1.0.0")
-UpdatesTab:CreateLabel("Last Updated: 2023-10-01")
-UpdatesTab:CreateParagraph({
-    Title = "Changelog",
-    Content = "- Added webhook logging\n- Improved UI\n- Fixed minor bugs"
-})
-
----- Close the Rayfield UI when the game is closed ----
-
-game:GetService("Players").PlayerRemoving:Connect(function(player)
-    if player == Players.LocalPlayer then
-        Rayfield:Destroy()
-    end
-end)
-
+-- Cleanup Rayfield UI on Game Close
 game:BindToClose(function()
     Rayfield:Destroy()
 end)
--- End of Logger.lua script
