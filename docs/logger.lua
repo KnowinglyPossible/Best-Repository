@@ -47,7 +47,7 @@ DiscontinuedTab:CreateParagraph({
 DiscontinuedTab:CreateButton({
     Name = "Launch Logger (ChatGPT)",
     Callback = function()
-        loadstring(game:HttpGet("https://knowinglypossible.github.io/Best-Repository/docs/Logger%20(ChatGPT).lua"))()
+        loadstring(game:HttpGet("https://knowinglypossible.github.io/Best-Repository/Logger%20(ChatGPT).lua"))()
     end
 })
 
