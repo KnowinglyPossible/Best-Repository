@@ -54,8 +54,8 @@ end
 
 -- Update Checker
 local CURRENT_VERSION = "1.0.0" -- Update this version as needed
-local VERSION_URL = "https://github.com/KnowinglyPossible/Best-Repository/blob/main/version.json" -- Replace with your [version.json](http://_vscodecontentref_/1) URL
-local SCRIPT_URL = "https://github.com/KnowinglyPossible/Best-Repository/blob/main/Logger.lua" -- Replace with your [Logger.lua](http://_vscodecontentref_/2) raw URL
+local VERSION_URL = "https://github.com/KnowinglyPossible/Best-Repository/raw/4ff78e0c80dd5db9aad807b842a162480b3e2c07/version.json" -- Replace with your [version.json](http://_vscodecontentref_/1) URL
+local SCRIPT_URL = "https://github.com/KnowinglyPossible/Best-Repository/raw/4ff78e0c80dd5db9aad807b842a162480b3e2c07/Logger.lua" -- Replace with your [Logger.lua](http://_vscodecontentref_/2) raw URL
 
 local function checkForUpdates()
     local success, response = pcall(function()
