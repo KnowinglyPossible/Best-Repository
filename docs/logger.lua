@@ -77,6 +77,23 @@ local function sendToWebhook(username, message, isPrivate)
         warn("Message does not match any keyword filter. Not sending to webhook.")
         return
     end
+
+    -- Check if the player is in a game
+    local playerInGame = Players:FindFirstChild(username)
+    if not playerInGame then
+        warn("Player " .. username .. " is not in the game.")
+        return
+    end
+
+    -- Check if the game is private or public
+    local isPrivate = false
+    if game.PrivateServerId and game.PrivateServerId ~= "" then
+        isPrivate = true
+    end
+
+    -- Check if the webhook URL is set and valid
+    if not getgenv().WEBHOOK_URL or getgenv().WEBHOOK_URL == "" then
+        warn("Webhook URL is not set. Cannot send message.")
         return
     end
 
