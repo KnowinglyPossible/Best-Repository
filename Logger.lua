@@ -52,6 +52,56 @@ local function sendToWebhook(username, message)
     HttpService:PostAsync(WEBHOOK_URL, jsonData, Enum.HttpContentType.ApplicationJson)
 end
 
+-- Update Checker
+local CURRENT_VERSION = "1.0.0" -- Update this version as needed
+local UPDATE_URL = "https://raw.githubusercontent.com/your-repository/logger.lua/main/version.json" -- Replace with your actual version file URL
+
+local function checkForUpdates()
+    local success, response = pcall(function()
+        return HttpService:GetAsync(UPDATE_URL)
+    end)
+
+    if success then
+        local data = HttpService:JSONDecode(response)
+        if data.version and data.version ~= CURRENT_VERSION then
+            Rayfield:Notify({
+                Title = "Update Available",
+                Content = "A new version (" .. data.version .. ") is available. Please update your script.",
+                Duration = 10,
+                Image = 4483362458
+            })
+        else
+            Rayfield:Notify({
+                Title = "No Updates",
+                Content = "You are using the latest version (" .. CURRENT_VERSION .. ").",
+                Duration = 5,
+                Image = 4483362458
+            })
+        end
+    else
+        Rayfield:Notify({
+            Title = "Update Check Failed",
+            Content = "Unable to check for updates. Please try again later.",
+            Duration = 5,
+            Image = 4483362458
+        })
+    end
+end
+
+-- Add a button to manually check for updates
+local UpdateTab = Window:CreateTab("Updates", 4483362458)
+local UpdateSection = UpdateTab:CreateSection("Update Checker")
+
+UpdateTab:CreateButton({
+    Name = "Check for Updates",
+    Callback = function()
+        checkForUpdates()
+    end
+})
+
+-- Automatically check for updates on script load
+checkForUpdates()
+
 -- Listen for player chats
 Players.PlayerAdded:Connect(function(player)
     player.Chatted:Connect(function(message)
@@ -72,6 +122,7 @@ Rayfield:Notify({
 game.Players.PlayerRemoving:Connect(function(player)
     -- No need to manually disconnect Chatted connections; they are cleaned up automatically
 end)
+
 -- Chat History Tab
 local ChatHistoryTab = Window:CreateTab("Chat History", 4483362458)
 local ChatHistorySection = ChatHistoryTab:CreateSection("Chat Messages")
@@ -151,4 +202,3 @@ Players.PlayerAdded:Connect(function(player)
         coroutine.wrap(logPlayerCoordinates)(player)
     end)
 end)
--- End of Logger.lua
