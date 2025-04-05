@@ -48,16 +48,30 @@ DiscontinuedTab:CreateButton({
     Name = "Launch Logger (ChatGPT)",
     Callback = function()
         -- Notify the user
-        Rayfield:Notify({
-            Title = "Launching Logger (ChatGPT)",
-            Content = "The updated Logger (ChatGPT).lua script is being launched.",
-            Duration = 5,
-            Image = "loader",
-            
-        })
-        -- Load the new Logger (ChatGPT) script from the URL
-        loadstring(game:HttpGet("https://knowinglypossible.github.io/Best-Repository/Logger%20(ChatGPT).lua"))()
-        print("Logger (ChatGPT) has been launched.")
+        pcall(function()
+            Rayfield:Notify({
+                Title = "Launching Logger (ChatGPT)",
+                Content = "The updated Logger (ChatGPT).lua script is being launched.",
+                Duration = 5,
+                Image = "loader"
+            })
+        end)
+
+        -- Safely load the new Logger (ChatGPT) script from the URL
+        local success, err = pcall(function()
+            loadstring(game:HttpGet("https://knowinglypossible.github.io/Best-Repository/Logger%20(ChatGPT).lua"))()
+        end)
+
+        if success then
+            print("Logger (ChatGPT) has been launched.")
+        else
+            warn("Failed to launch Logger (ChatGPT): " .. tostring(err))
+            Rayfield:Notify({
+                Title = "Error",
+                Content = "Failed to launch Logger (ChatGPT). Check the URL or your internet connection.",
+                Duration = 5
+            })
+        end
     end
 })
 
