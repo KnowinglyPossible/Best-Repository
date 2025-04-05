@@ -267,5 +267,25 @@ MainTab:CreateButton({
     end
 })
 
+-- Analytics Tab
+local AnalyticsTab = Window:CreateTab("Analytics", 4483362458)
+AnalyticsTab:CreateParagraph({
+    Title = "Real-Time Analytics",
+    Content = "Messages Logged: 0\nPrivate Messages: 0\nPublic Messages: 0"
+})
+
+local function updateAnalytics(isPrivate)
+    analytics.total = analytics.total + 1
+    if isPrivate then
+        analytics.private = analytics.private + 1
+    else
+        analytics.public = analytics.public + 1
+    end
+    AnalyticsTab:CreateParagraph({
+        Title = "Real-Time Analytics",
+        Content = string.format("Messages Logged: %d\nPrivate Messages: %d\nPublic Messages: %d", analytics.total, analytics.private, analytics.public)
+    })
+end
+
 -- Initialize Rayfield UI
 Rayfield:LoadConfiguration()
