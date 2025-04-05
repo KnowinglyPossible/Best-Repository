@@ -157,26 +157,6 @@ UpdatesTab:CreateParagraph({
     Content = "- Added webhook logging\n- Improved UI\n- Fixed minor bugs"
 })
 
-UpdatesTab:CreateButton({
-    Name = "Check for Updates",
-    Callback = function()
-        Rayfield:Notify({
-            Title = "Update Check",
-            Content = "No new updates available.",
-            Duration = 5
-        })
-    end
-}) ──
-UpdatesTab:CreateButton({
-    Name = "Check for Updates",
-    Callback = function()
-        Rayfield:Notify({
-            Title = "Update Check",
-            Content = "No new updates available.",
-            Duration = 5
-        })
-    end
-})
 ---- Close the Rayfield UI when the game is closed ----
 
 game:GetService("Players").PlayerRemoving:Connect(function(player)
@@ -184,4 +164,4 @@ game:GetService("Players").PlayerRemoving:Connect(function(player)
         Rayfield:Destroy()
     end
 end)
--- End of Logger.lua script ---
+-- End of Logger.lua script
