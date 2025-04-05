@@ -28,3 +28,6 @@ These images demonstrate how log messages appear in a typical game console or de
 3. Require the logger module in your script and start logging messages.
 
 Make sure to replace the `https://raw.githubusercontent.com/your-repository/logger.lua/main/logger.lua` link with the actual URL of your [logger.lua](http://_vscodecontentref_/1) file. This will allow users to directly download the file for their projects.
+
+```lua
+require("update_checker")
