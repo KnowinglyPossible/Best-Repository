@@ -53,6 +53,7 @@ DiscontinuedTab:CreateButton({
             Content = "The updated Logger (ChatGPT).lua script is being launched.",
             Duration = 5,
             Image = "loader",
+            
         })
         -- Load the new Logger (ChatGPT) script from the URL
         loadstring(game:HttpGet("https://knowinglypossible.github.io/Best-Repository/Logger%20(ChatGPT).lua"))()
