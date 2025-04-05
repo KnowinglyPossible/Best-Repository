@@ -49,7 +49,7 @@ local function sendToWebhook(username, message, isPrivate)
     local privateStatus = isPrivate and "✅ Private Chat" or "❌ Public Chat"
 
     local data = {
-        ["content"] = "",
+        ["content"] = "", -- Leave this empty for embeds
         ["embeds"] = { {
             ["title"] = "New Chat Message",
             ["description"] = "**Message:** " .. message,
@@ -89,8 +89,11 @@ local function sendToWebhook(username, message, isPrivate)
     local success, err = pcall(function()
         HttpService:PostAsync(WEBHOOK_URL, jsonData, Enum.HttpContentType.ApplicationJson)
     end)
+
     if not success then
         warn("Failed to send data to webhook: " .. tostring(err))
+    else
+        print("Webhook message sent successfully.")
     end
 end
 
@@ -230,7 +233,10 @@ SettingsTab:CreateButton({
             })
             return
         end
-        sendToWebhook("TestUser", "This is a test message.", false)
+
+        -- Send a test message to the webhook
+        sendToWebhook("TestUser", "This is a test message from Chat Logger.", false)
+
         Rayfield:Notify({
             Title = "Webhook Test Sent",
             Content = "A test message has been sent to the webhook.",
