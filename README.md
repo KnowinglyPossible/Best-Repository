@@ -6,15 +6,21 @@
 Here are some examples of how the `logger.lua` script can be used in a game environment:
 
 ### Example 1: Info Log
-![Info Log Example](https://via.placeholder.com/600x200?text=Info+Log+Example)
+```lua
+Logger:Info("This is an informational message.")
+```
 
 ### Example 2: Warning Log
-![Warning Log Example](https://via.placeholder.com/600x200?text=Warning+Log+Example)
+```lua
+Logger:Warn("This is a warning message.")
+```
 
 ### Example 3: Error Log
-![Error Log Example](https://via.placeholder.com/600x200?text=Error+Log+Example)
+```lua
+Logger:Error("This is an error message.")
+```
 
-These images demonstrate how log messages appear in a typical game console or debug window, helping developers quickly identify issues or monitor application behavior.
+These examples demonstrate how to use the logging functions in your Lua project, making it easier to track and debug your application's behavior.
 
 ## Features
 - **Customizable Log Levels**: Supports multiple log levels such as `INFO`, `WARN`, `ERROR`, and more.
