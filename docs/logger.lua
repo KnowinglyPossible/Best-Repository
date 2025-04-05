@@ -1,45 +1,23 @@
--- Logger.lua
--- Make sure to include Rayfield UI library in your game from https://sirius.menu
+-- Chat Logger for Roblox Executor
+-- Ensure your executor supports `syn.request` or `http_request`
 
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 
--- Rayfield UI Setup
-local success, Rayfield = pcall(function()
-    return loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
-end)
-
-if not success or not Rayfield then
-    error("Failed to load Rayfield UI library. Please check the URL or your internet connection.")
-end
-
--- Create the main Rayfield window
-local Window = Rayfield:CreateWindow({
-    Name = "Chat Logger",
-    LoadingTitle = "Chat Logger UI",
-    LoadingSubtitle = "by Carlos277415",
-    ConfigurationSaving = {
-        Enabled = true,
-        FolderName = "ChatLogger",
-        FileName = "Config"
-    },
-    KeySystem = false
-})
-
 -- Webhook URL (default empty, to be set via UI)
-local WEBHOOK_URL = ""
-local ICON_ID = 4483362458
+getgenv().WEBHOOK_URL = ""
+getgenv().WebhookLoggingEnabled = true
+getgenv().ExcludedPlayers = {}
+getgenv().KeywordFilter = {}
 
 -- Message History Table
 local messageHistory = {}
 local analytics = { total = 0, private = 0, public = 0 }
-local excludedPlayers = {}
-local keywordFilter = {}
 
 -- Function to send message to Discord Webhook
 local function sendToWebhook(username, message, isPrivate)
-    if WEBHOOK_URL == "" or not WEBHOOK_URL:match("^https?://") then
-        warn("Invalid or empty Webhook URL. Please set it in the Settings tab.")
+    if getgenv().WEBHOOK_URL == "" or not getgenv().WEBHOOK_URL:match("^https?://") then
+        warn("Invalid or empty Webhook URL. Please set it in the UI.")
         return
     end
 
@@ -86,8 +64,14 @@ local function sendToWebhook(username, message, isPrivate)
     }
 
     local jsonData = HttpService:JSONEncode(data)
+    local response = syn.request or http_request or request -- Use executor's HTTP request API
     local success, err = pcall(function()
-        HttpService:PostAsync(WEBHOOK_URL, jsonData, Enum.HttpContentType.ApplicationJson)
+        response({
+            Url = getgenv().WEBHOOK_URL,
+            Method = "POST",
+            Headers = { ["Content-Type"] = "application/json" },
+            Body = jsonData
+        })
     end)
 
     if not success then
@@ -97,161 +81,13 @@ local function sendToWebhook(username, message, isPrivate)
     end
 end
 
--- Main Tab
-local MainTab = Window:CreateTab("Main", ICON_ID)
-MainTab:CreateLabel("Welcome to Chat Logger!")
-MainTab:CreateParagraph({
-    Title = "Instructions",
-    Content = "Use the Settings tab to configure the webhook URL and enable logging. Chat messages will be logged and sent to the configured webhook."
-})
-
--- Message History Section
-local messageHistoryParagraph = MainTab:CreateParagraph({
-    Title = "Message History",
-    Content = "No messages yet..."
-})
-
--- Real-Time Analytics Section
-local analyticsParagraph = MainTab:CreateParagraph({
-    Title = "Real-Time Analytics",
-    Content = "Messages Logged: 0\nPrivate Messages: 0\nPublic Messages: 0"
-})
-
-local function updateAnalytics(isPrivate)
-    analytics.total = analytics.total + 1
-    if isPrivate then
-        analytics.private = analytics.private + 1
-    else
-        analytics.public = analytics.public + 1
-    end
-    analyticsParagraph:Set({
-        Title = "Real-Time Analytics",
-        Content = string.format("Messages Logged: %d\nPrivate Messages: %d\nPublic Messages: %d", analytics.total, analytics.private, analytics.public)
-    })
-end
-
--- Function to update the message history in the UI
-local function updateMessageHistory()
-    local content = ""
-    for _, msg in ipairs(messageHistory) do
-        content = content .. msg .. "\n"
-    end
-    messageHistoryParagraph:Set({
-        Title = "Message History",
-        Content = content
-    })
-end
-
--- Settings Tab
-local SettingsTab = Window:CreateTab("Settings", ICON_ID)
-SettingsTab:CreateSection("Webhook Settings")
-
-SettingsTab:CreateInput({
-    Name = "Set Webhook URL",
-    PlaceholderText = "Enter your webhook URL",
-    RemoveTextAfterFocusLost = false,
-    Callback = function(Value)
-        if not Value:match("^https?://") then
-            Rayfield:Notify({
-                Title = "Invalid URL",
-                Content = "Please enter a valid webhook URL.",
-                Duration = 5
-            })
-            return
-        end
-        WEBHOOK_URL = Value
-        Rayfield:Notify({
-            Title = "Webhook URL Updated",
-            Content = "The webhook URL has been updated successfully.",
-            Duration = 5
-        })
-    end
-})
-
-SettingsTab:CreateToggle({
-    Name = "Enable Webhook Logging",
-    CurrentValue = true,
-    Flag = "EnableWebhookLogging",
-    Callback = function(Value)
-        _G.WebhookLoggingEnabled = Value
-    end
-})
-
-SettingsTab:CreateInput({
-    Name = "Set Keyword Filter",
-    PlaceholderText = "Enter keywords separated by commas",
-    RemoveTextAfterFocusLost = false,
-    Callback = function(Value)
-        keywordFilter = {}
-        for keyword in Value:gmatch("[^,]+") do
-            table.insert(keywordFilter, keyword:lower():gsub("^%s*(.-)%s*$", "%1")) -- Trim and lowercase
-        end
-        Rayfield:Notify({
-            Title = "Keyword Filter Updated",
-            Content = "Messages containing specified keywords will now be logged.",
-            Duration = 5
-        })
-    end
-})
-
-SettingsTab:CreateInput({
-    Name = "Exclude Player from Logging",
-    PlaceholderText = "Enter player name",
-    RemoveTextAfterFocusLost = false,
-    Callback = function(Value)
-        table.insert(excludedPlayers, Value)
-        Rayfield:Notify({
-            Title = "Player Excluded",
-            Content = Value .. " will no longer be logged.",
-            Duration = 5
-        })
-    end
-})
-
-SettingsTab:CreateButton({
-    Name = "Export Chat History",
-    Callback = function()
-        local fileName = "ChatHistory_" .. os.date("%Y-%m-%d_%H-%M-%S") .. ".txt"
-        local fileContent = table.concat(messageHistory, "\n")
-        writefile(fileName, fileContent)
-        Rayfield:Notify({
-            Title = "Export Successful",
-            Content = "Chat history has been exported to " .. fileName,
-            Duration = 5
-        })
-    end
-})
-
-SettingsTab:CreateButton({
-    Name = "Test Webhook",
-    Callback = function()
-        if WEBHOOK_URL == "" or not WEBHOOK_URL:match("^https?://") then
-            Rayfield:Notify({
-                Title = "Invalid Webhook URL",
-                Content = "Please set a valid webhook URL first.",
-                Duration = 5
-            })
-            return
-        end
-
-        -- Send a test message to the webhook
-        sendToWebhook("TestUser", "This is a test message from Chat Logger.", false)
-
-        Rayfield:Notify({
-            Title = "Webhook Test Sent",
-            Content = "A test message has been sent to the webhook.",
-            Duration = 5
-        })
-    end
-})
-
--- Chat Logging Functionality
+-- Function to log chat messages
 local function onPlayerChatted(player, message, recipient)
-    if not _G.WebhookLoggingEnabled then
+    if not getgenv().WebhookLoggingEnabled then
         return
     end
 
-    if table.find(excludedPlayers, player.Name) then
+    if table.find(getgenv().ExcludedPlayers, player.Name) then
         return
     end
 
@@ -259,8 +95,8 @@ local function onPlayerChatted(player, message, recipient)
     local chatType = isPrivate and "[Private]" or "[Public]"
 
     -- Check for keyword filter
-    local shouldLog = #keywordFilter == 0
-    for _, keyword in ipairs(keywordFilter) do
+    local shouldLog = #getgenv().KeywordFilter == 0
+    for _, keyword in ipairs(getgenv().KeywordFilter) do
         if message:lower():find(keyword) then
             shouldLog = true
             break
@@ -281,9 +117,13 @@ local function onPlayerChatted(player, message, recipient)
         table.remove(messageHistory, 1)
     end
 
-    -- Update the UI
-    updateMessageHistory()
-    updateAnalytics(isPrivate)
+    -- Update analytics
+    analytics.total = analytics.total + 1
+    if isPrivate then
+        analytics.private = analytics.private + 1
+    else
+        analytics.public = analytics.public + 1
+    end
 end
 
 -- Connect chat events for all players
@@ -304,7 +144,65 @@ end
 -- Initialize Chat Logging
 setupChatLogging()
 
--- Cleanup Rayfield UI on Game Close
-game:BindToClose(function()
-    Rayfield:Destroy()
-end)
+-- Simple UI for Executors
+local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/shlexware/Orion/main/source"))()
+local Window = OrionLib:MakeWindow({ Name = "Chat Logger", HidePremium = false, SaveConfig = true, ConfigFolder = "ChatLogger" })
+
+local MainTab = Window:MakeTab({ Name = "Main", Icon = "rbxassetid://4483362458", PremiumOnly = false })
+MainTab:AddLabel("Welcome to Chat Logger!")
+
+MainTab:AddTextbox({
+    Name = "Set Webhook URL",
+    Default = "",
+    TextDisappear = false,
+    Callback = function(Value)
+        getgenv().WEBHOOK_URL = Value
+    end
+})
+
+MainTab:AddToggle({
+    Name = "Enable Webhook Logging",
+    Default = true,
+    Callback = function(Value)
+        getgenv().WebhookLoggingEnabled = Value
+    end
+})
+
+MainTab:AddTextbox({
+    Name = "Set Keyword Filter (comma-separated)",
+    Default = "",
+    TextDisappear = false,
+    Callback = function(Value)
+        getgenv().KeywordFilter = {}
+        for keyword in Value:gmatch("[^,]+") do
+            table.insert(getgenv().KeywordFilter, keyword:lower():gsub("^%s*(.-)%s*$", "%1")) -- Trim and lowercase
+        end
+    end
+})
+
+MainTab:AddTextbox({
+    Name = "Exclude Player from Logging",
+    Default = "",
+    TextDisappear = false,
+    Callback = function(Value)
+        table.insert(getgenv().ExcludedPlayers, Value)
+    end
+})
+
+MainTab:AddButton({
+    Name = "Test Webhook",
+    Callback = function()
+        sendToWebhook("TestUser", "This is a test message from Chat Logger.", false)
+    end
+})
+
+MainTab:AddButton({
+    Name = "Export Chat History",
+    Callback = function()
+        local fileName = "ChatHistory_" .. os.date("%Y-%m-%d_%H-%M-%S") .. ".txt"
+        local fileContent = table.concat(messageHistory, "\n")
+        writefile(fileName, fileContent)
+    end
+})
+
+OrionLib:Init()
