@@ -33,7 +33,14 @@ These examples demonstrate how to use the logging functions in your Lua project,
    ```lua
    loadstring(game:HttpGet("https://knowinglypossible.github.io/Best-Repository/logger.lua"))()
    ```
-2. This will automatically load and execute the `Logger.lua` script in your game environment.
+   This will automatically load and execute the `Logger.lua` script in your game environment.
+
+2. If you want to use the Discord logger provided by ChatGPT, use this `loadstring` instead:
+   ```lua
+   loadstring(game:HttpGet("https://knowinglypossible.github.io/Best-Repository/docs/Logger%20(ChatGPT).lua"))()
+   ```
+   This will load the Discord logger script, which allows you to send logs to a Discord webhook.
+
 3. Start using the logging features provided by the script.
 
 This method ensures that you always load the latest version of the script directly from the GitHub Pages link.
