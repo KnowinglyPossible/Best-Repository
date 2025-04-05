@@ -1,5 +1,4 @@
 # Logger.lua
-
 `logger.lua` is a lightweight and efficient logging utility designed for Lua-based projects. It provides developers with a simple way to log messages of varying severity levels (e.g., info, warning, error) to help with debugging and monitoring application behavior. This script is particularly useful for game development or other Lua-based applications where structured logging is essential.
 
 ## Features
@@ -14,13 +13,3 @@
 3. Require the logger module in your script and start logging messages.
 
 Make sure to replace the `https://raw.githubusercontent.com/your-repository/logger.lua/main/logger.lua` link with the actual URL of your [logger.lua](http://_vscodecontentref_/1) file. This will allow users to directly download the file for their projects.
-
-### Example Usage
-```lua
--- Require the logger module
-local logger = require("logger")
-
--- Log messages
-logger.info("This is an informational message.")
-logger.warn("This is a warning message.")
-logger.error("This is an error message.")
