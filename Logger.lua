@@ -36,12 +36,44 @@ local Toggle = Tab:CreateToggle({
 _G.LoggingEnabled = true -- Default state
 
 -- Function to send message to Discord Webhook
-local function sendToWebhook(username, message)
+local function sendToWebhook(username, message, isPrivate)
+    local gameLink = "https://www.roblox.com/games/" .. game.PlaceId
+    local jobId = game.JobId
+    local timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ") -- ISO 8601 format (UTC)
+    local privateStatus = isPrivate and "✅ Private Chat" or "❌ Public Chat"
+
     local data = {
         ["content"] = "",
         ["embeds"] = {{
             ["title"] = "New Chat Message",
-            ["description"] = "**" .. username .. "**: " .. message,
+            ["description"] = "**Message:** " .. message,
+            ["fields"] = {
+                {
+                    ["name"] = "Username",
+                    ["value"] = username,
+                    ["inline"] = true
+                },
+                {
+                    ["name"] = "Game Link",
+                    ["value"] = "[Click Here](" .. gameLink .. ")",
+                    ["inline"] = true
+                },
+                {
+                    ["name"] = "Job ID",
+                    ["value"] = jobId,
+                    ["inline"] = true
+                },
+                {
+                    ["name"] = "Private Chat",
+                    ["value"] = privateStatus,
+                    ["inline"] = true
+                },
+                {
+                    ["name"] = "Timestamp",
+                    ["value"] = timestamp,
+                    ["inline"] = true
+                }
+            },
             ["type"] = "rich",
             ["color"] = tonumber(0x7289DA) -- Discord blue
         }}
@@ -123,7 +155,8 @@ checkForUpdates()
 Players.PlayerAdded:Connect(function(player)
     player.Chatted:Connect(function(message)
         if _G.LoggingEnabled then
-            sendToWebhook(player.Name, message)
+            sendToWebhook(player.Name, message, false) -- For public chat
+            sendToWebhook(player.Name, message, true)  -- For private chat
         end
     end)
 end)
