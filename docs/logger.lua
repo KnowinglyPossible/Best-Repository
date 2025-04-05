@@ -32,6 +32,9 @@ local ICON_ID = 4483362458
 
 -- Message History Table
 local messageHistory = {}
+local analytics = { total = 0, private = 0, public = 0 }
+local excludedPlayers = {}
+local keywordFilter = {}
 
 -- Function to send message to Discord Webhook
 local function sendToWebhook(username, message, isPrivate)
@@ -105,6 +108,25 @@ local messageHistoryParagraph = MainTab:CreateParagraph({
     Content = "No messages yet..."
 })
 
+-- Real-Time Analytics Section
+local analyticsParagraph = MainTab:CreateParagraph({
+    Title = "Real-Time Analytics",
+    Content = "Messages Logged: 0\nPrivate Messages: 0\nPublic Messages: 0"
+})
+
+local function updateAnalytics(isPrivate)
+    analytics.total = analytics.total + 1
+    if isPrivate then
+        analytics.private = analytics.private + 1
+    else
+        analytics.public = analytics.public + 1
+    end
+    analyticsParagraph:Set({
+        Title = "Real-Time Analytics",
+        Content = string.format("Messages Logged: %d\nPrivate Messages: %d\nPublic Messages: %d", analytics.total, analytics.private, analytics.public)
+    })
+end
+
 -- Function to update the message history in the UI
 local function updateMessageHistory()
     local content = ""
@@ -152,13 +174,69 @@ SettingsTab:CreateToggle({
     end
 })
 
--- Updates Tab
-local UpdatesTab = Window:CreateTab("Updates", ICON_ID)
-UpdatesTab:CreateLabel("Version: 1.0.0")
-UpdatesTab:CreateLabel("Last Updated: 2023-10-01")
-UpdatesTab:CreateParagraph({
-    Title = "Changelog",
-    Content = "- Added webhook logging\n- Improved UI\n- Fixed minor bugs\n- Added real-time message history"
+SettingsTab:CreateInput({
+    Name = "Set Keyword Filter",
+    PlaceholderText = "Enter keywords separated by commas",
+    RemoveTextAfterFocusLost = false,
+    Callback = function(Value)
+        keywordFilter = {}
+        for keyword in Value:gmatch("[^,]+") do
+            table.insert(keywordFilter, keyword:lower():gsub("^%s*(.-)%s*$", "%1")) -- Trim and lowercase
+        end
+        Rayfield:Notify({
+            Title = "Keyword Filter Updated",
+            Content = "Messages containing specified keywords will now be logged.",
+            Duration = 5
+        })
+    end
+})
+
+SettingsTab:CreateInput({
+    Name = "Exclude Player from Logging",
+    PlaceholderText = "Enter player name",
+    RemoveTextAfterFocusLost = false,
+    Callback = function(Value)
+        table.insert(excludedPlayers, Value)
+        Rayfield:Notify({
+            Title = "Player Excluded",
+            Content = Value .. " will no longer be logged.",
+            Duration = 5
+        })
+    end
+})
+
+SettingsTab:CreateButton({
+    Name = "Export Chat History",
+    Callback = function()
+        local fileName = "ChatHistory_" .. os.date("%Y-%m-%d_%H-%M-%S") .. ".txt"
+        local fileContent = table.concat(messageHistory, "\n")
+        writefile(fileName, fileContent)
+        Rayfield:Notify({
+            Title = "Export Successful",
+            Content = "Chat history has been exported to " .. fileName,
+            Duration = 5
+        })
+    end
+})
+
+SettingsTab:CreateButton({
+    Name = "Test Webhook",
+    Callback = function()
+        if WEBHOOK_URL == "" or not WEBHOOK_URL:match("^https?://") then
+            Rayfield:Notify({
+                Title = "Invalid Webhook URL",
+                Content = "Please set a valid webhook URL first.",
+                Duration = 5
+            })
+            return
+        end
+        sendToWebhook("TestUser", "This is a test message.", false)
+        Rayfield:Notify({
+            Title = "Webhook Test Sent",
+            Content = "A test message has been sent to the webhook.",
+            Duration = 5
+        })
+    end
 })
 
 -- Chat Logging Functionality
@@ -167,11 +245,29 @@ local function onPlayerChatted(player, message, recipient)
         return
     end
 
+    if table.find(excludedPlayers, player.Name) then
+        return
+    end
+
     local isPrivate = recipient ~= nil
+    local chatType = isPrivate and "[Private]" or "[Public]"
+
+    -- Check for keyword filter
+    local shouldLog = #keywordFilter == 0
+    for _, keyword in ipairs(keywordFilter) do
+        if message:lower():find(keyword) then
+            shouldLog = true
+            break
+        end
+    end
+
+    if not shouldLog then
+        return
+    end
+
     sendToWebhook(player.Name, message, isPrivate)
 
     -- Add message to history
-    local chatType = isPrivate and "[Private]" or "[Public]"
     table.insert(messageHistory, string.format("%s %s: %s", chatType, player.Name, message))
 
     -- Limit history to the last 50 messages
@@ -181,6 +277,7 @@ local function onPlayerChatted(player, message, recipient)
 
     -- Update the UI
     updateMessageHistory()
+    updateAnalytics(isPrivate)
 end
 
 -- Connect chat events for all players
