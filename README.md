@@ -31,9 +31,9 @@ These examples demonstrate how to use the logging functions in your Lua project,
 ## How to Use
 1. Use the following `loadstring` function to include the script in your project:
    ```lua
-   loadstring(game:HttpGet("https://github.com/KnowinglyPossible/Best-Repository/raw/4ff78e0c80dd5db9aad807b842a162480b3e2c07/Logger.lua"))()
+   loadstring(game:HttpGet("https://knowinglypossible.github.io/Best-Repository/logger.lua"))()
    ```
 2. This will automatically load and execute the `Logger.lua` script in your game environment.
 3. Start using the logging features provided by the script.
 
-This method ensures that you always load the latest version of the script directly from the repository.
+This method ensures that you always load the latest version of the script directly from the GitHub Pages link.
