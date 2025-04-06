@@ -49,6 +49,6 @@ This method ensures that you always load the latest version of the script direct
 > **DO NOT** use the `loadstring` function with any other links, as it may expose your game to security risks.
 
 > [!CAUTION] 
->Only use the provided links from this repository.
+> Only use the provided links from this repository.
 
 **Enjoy your game development!**
