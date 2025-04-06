@@ -44,3 +44,7 @@ These examples demonstrate how to use the logging functions in your Lua project,
 3. Start using the logging features provided by the script.
 
 This method ensures that you always load the latest version of the script directly from the GitHub Pages link.
+![WARNING:](https://github.com/user-attachments/assets/89093137-8147-4499-876f-62233954324f)
+**DO NOT** use the `loadstring` function with any other links, as it may expose your game to security risks. Only use the provided links from this repository.
+
+**Enjoy your game development!**
